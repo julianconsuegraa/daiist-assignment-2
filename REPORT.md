@@ -83,6 +83,19 @@ model actually confuses with what. Show where it breaks, not just that it
 works.*
 
 ## Cost matrix and operating point
+Based on research on actual costs of PCB factories and Spanish salaries, I approximated euro cost for each kind of error.
+
+- False Negative: **€100**. Once a defective board ships, the client assembles components onto it, and when it fails the board maker has to compensate the client for those components and the rework. A rule of thumb will be implemented in which the defect gets 10x more expensive at each stage it escapes. So for a €5 board problem, it becomes about €50-100+ once it reaches assembling stages.
+
+- False Positive: **€5**. If a good board is wasted, the cost incurred would be production cost. This is the value of producing a multi-layered board on average based on PCB factory information.
+
+- Inspection: **€0.33**. When inspection is needed due to uncertainty on a board, the cost is calculated based on how much time an inspector takes checking and the average cost incurred by employers for having inspectors in Spain. It takes about 1 minute at around €20/hour would result in a cost of approximately €0.33 per revision. 
+
+- Correct Decisions: **€0**. A correctly discarded board was lost anyway, whatever the model does, so the model doesn't add a cost there. 
+
+- Base rate: **5%**. In an industry survey towards PCB companies in which they asked what percent of bare boards passed inspection, the average was from 90-98%. I decided to use an average of 95% meaning that only 5% of the boards in a factory are defective. 
+
+The most uncertain assumption here is the cost for False Negatives. It highly depends on whether the client catches it in initial testing before adding components (as low as 30 euros) or in the point where the defective board ends up in a finished phone that a customer returns (500 euros or more). Considering this, the threshold decision will be a trade-off between missing defects and paying more for inspections. If a miss is very expensive, the threshold for inspection will be low to make sure there are minimal misses. However, if a miss is cheap, fewer inspections are worth paying and a higher threshold can be set. To address this, I will rerun a cost sweep with €30 and €500 to see if thresholds differ or stay somewhat similar.  
 
 *Your euro cost for each kind of error and where each figure came from. The
 base rate you assumed. The cost-against-threshold sweep, and the operating
