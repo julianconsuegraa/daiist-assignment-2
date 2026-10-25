@@ -1,38 +1,60 @@
-"""
-Assignment 2: training pipeline.
+"""Assignment 2 training pipeline: PCB defect detection."""
+import shutil
+from pathlib import Path
 
-You're using a script for this stage. If you'd rather use a notebook,
-write train.ipynb instead and delete this file. main.py refuses to run if
-it finds both train.py and train.ipynb, so exactly one of them must exist.
+import yaml
+from roboflow import Roboflow
+from ultralytics import YOLO
 
-Replace this docstring and everything below it with your own code. When run
-via uv run python main.py train, this file must, start to finish, with no
-manual steps in between:
+from api_key import load_api_key
 
-- Get your Roboflow API key via from api_key import load_api_key, so that it
-  works whether the key is in your .env file or in the environment, and
-  download your dataset version from Roboflow Universe.
-- Finetune yolo11n/yolo11s (or the -cls variant) on that dataset, from the
-  pretrained checkpoint.
-- Evaluate on the test split against the two baselines named in the brief: the
-  pretrained COCO model zero-shot, and a trivial predict-nothing / majority
-  class baseline.
-- Sweep the confidence threshold, compute the expected cost at each point from
-  the cost matrix you defined in REPORT.md, and save the sweep.
-- Save everything app.py needs to build its dashboard without retraining:
-  the metrics, the per-class numbers, the cost sweep, and the chosen operating
-  point.
+ROOT = Path(__file__).resolve().parent
+DATA_DIR = ROOT / "data"
+WEIGHTS = ROOT / "weights" / "best.pt"
 
-This is your real training pipeline. It takes as long as it takes, and it runs
-wherever training is practical for you: your own machine, a GPU you have access
-to, or a hosted notebook. Nothing re-runs it to check your submission.
+# Dataset on Roboflow Universe (recorded in REPORT.md)
+WORKSPACE = "object-detection-dt-wzpc6"
+PROJECT = "pcb-dataset-defect"
+VERSION = 1
 
-The weights it produces are what you commit to weights/ and what your app
-serves. Say in REPORT.md where you trained and what settings you used.
+# Training settings
+BASE_MODEL = "yolo11s.pt"  # pretrained COCO checkpoint we finetune from
+IMGSZ = 1024               # larger than the default 640 because defects are tiny
+EPOCHS = 100
+PATIENCE = 20              # stop early if validation stops improving
+BATCH = 8
 
-Save the trained model into weights/. That is the file you commit and the file
-app.py loads.
 
-How you structure the code beyond that is your call to make and be able to
-defend: file layout, function boundaries, naming.
-"""
+def download_data() -> Path:
+    """Download the dataset and point data.yaml at the right folders."""
+    rf = Roboflow(api_key=load_api_key())
+    rf.workspace(WORKSPACE).project(PROJECT).version(VERSION).download(
+        "yolov11", location=str(DATA_DIR)
+    )
+    yaml_path = DATA_DIR / "data.yaml"
+    cfg = yaml.safe_load(yaml_path.read_text())
+    cfg.update(path=str(DATA_DIR), train="train/images",
+               val="valid/images", test="test/images")
+    yaml_path.write_text(yaml.safe_dump(cfg))
+    return yaml_path
+
+
+def train_model(data_yaml: Path) -> None:
+    """Finetune YOLO from the pretrained checkpoint and save the best weights."""
+    model = YOLO(BASE_MODEL)
+    model.train(data=str(data_yaml), imgsz=IMGSZ, epochs=EPOCHS,
+                patience=PATIENCE, batch=BATCH, seed=0,
+                project=str(ROOT / "runs"), name="pcb", exist_ok=True)
+    WEIGHTS.parent.mkdir(exist_ok=True)
+    shutil.copy(model.trainer.best, WEIGHTS)
+    print(f"Saved best weights to {WEIGHTS}")
+
+
+def main() -> None:
+    data_yaml = download_data()
+    train_model(data_yaml)
+    # Next: evaluation + baselines, cost sweep, saving results for the app
+
+
+if __name__ == "__main__":
+    main()
