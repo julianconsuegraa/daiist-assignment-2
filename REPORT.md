@@ -7,9 +7,9 @@
 
 ## Business problem, and the cost of being wrong
 
-I decided to focus my project on the manufacturing process  of circuit boards. Circuit boards are flat green boards located inside basically any electronic device. Their main purpose is to act as the "skeleton" of these devices, carrying wires, chips and overall small components that enable proper functionality. The business I will be focusing on is a factory that produces these boards and sells them to electronic manufacturers. Currently, the factory relies on inspectors who personally check the products before they are shipped. Defects are often tiny, and checking every board by eye is slow and tiring, so inspectors can miss them. I will create a model that is able to flag boards that are likely to have a defect, reshaping the human-in-the-loop and introducing human interaction only when the model is unsure. Defects will be treated as the positive class during the detection process. 
+I decided to focus my project on the manufacturing process of circuit boards. Circuit boards are flat green boards located inside basically any electronic device. Their main purpose is to act as the "skeleton" of these devices, carrying wires, chips and overall small components that enable proper functionality. The business I will be focusing on is a factory that produces these boards and sells them to electronic manufacturers. Currently, the factory relies on inspectors who personally check the products before they are shipped. Defects are often tiny, and checking every board by eye is slow and tiring, so inspectors can miss them. I will create a model that is able to flag boards that are likely to have a defect, reshaping the human-in-the-loop and introducing human interaction only when the model is unsure. Defects will be treated as the positive class during the detection process. 
 
-This seemed like an interesting opportunity since production lines in this industry must follow strict quality control measures as these boards will ultimately determine if the final product works or not. Also, the cost of a mistake is high compared to other industries such as food or clothing. Since electronic products are usually sold at high prices in the market, a false negative would lead to producing broken phones or computers that result in client dissatisfaction and refund requests. On the other hand, a false positive would not be as costly. A good board would be wasted and the costs incurred would be those of manufacturing it which are minimal or even just a couple of minutes of an inspector depending on the case. Considering this, a false negative could cost approximately 10x to 50x (or more depending on the final product) more than a false positive. To put it in perspective, a board can cost about €5 to make while a refund of a whole device could cost €200 at least (some could even reach €1,000+ depending on brand and device). It is important to know the factory is not in charge of the refund process as the electronic manufacturer is the one facing the client directly, but they will be responsible for a compensation. It is a significant difference that if not managed properly, profit margins of businesses could be directly affected in the long run. Since a missed defect is the worst outcome, a low threshold will be set to avoid false negatives even if there needs to be more human intervention at first involving inspections. The metric to focus on will specifically be recall on defects;lower precision will be accepted considering the ultimate goal. 
+This seemed like an interesting opportunity since production lines in this industry must follow strict quality control measures as these boards will ultimately determine if the final product works or not. Also, the cost of a mistake is high compared to other industries such as food or clothing. Since electronic products are usually sold at high prices in the market, a false negative would lead to producing broken phones or computers that result in client dissatisfaction and refund requests. On the other hand, a false positive would not be as costly. A good board would be wasted and the costs incurred would be those of manufacturing it which are minimal or even just a couple of minutes of an inspector depending on the case. Considering this, a false negative could cost approximately 10x to 50x (or more depending on the final product) more than a false positive. To put it in perspective, a board can cost about €5 to make while a refund of a whole device could cost €200 at least (some could even reach €1,000+ depending on brand and device). It is important to know the factory is not in charge of the refund process as the electronic manufacturer is the one facing the client directly, but they will be responsible for a compensation. It is a significant difference that if not managed properly, profit margins of businesses could be directly affected in the long run. Since a missed defect is the worst outcome, a low threshold will be set to avoid false negatives even if there needs to be more human intervention at first involving inspections. The metric to focus on will specifically be recall on defects; lower precision will be accepted considering the ultimate goal. 
 
 ## Dataset
 
@@ -19,16 +19,16 @@ Version: 1
 Link: universe.roboflow.com/object-detection-dt-wzpc6/pcb-dataset-defect/dataset/1
 License: CC BY 4.0
 
-In the chosen dataset, each image are plain circuit boards (with no chips attached yet) with different defects highlighted with boxes sorrounding them. They are very small details represented by these 6 different classes:
+In the chosen dataset, each image shows a bare circuit boards (with no chips attached yet) with different defects highlighted with boxes surrounding them. They are very small details represented by these 6 different classes:
 
 1. missing_hole: A hole that should have been drilled and isn't there
 2. mouse_bite: Small indents out of the edge of a copper line, making it thinner and weaker
-3. open_circuit: A copper line is broken, so electriicty can't pass.
+3. open_circuit: A copper line is broken, so electricity can't pass.
 4. short: Two copper lines are joined when they shouldn't be.
 5. spur: A small spike of copper sticking out from a line
-6. spurious_copper Residue of copper where there shouldn't be any.
+6. spurious_copper: Residue of copper where there shouldn't be any.
 
-The dataset serves the problem directly as the images used show the boards at the stage in which they are sent to electronic manufacturers before any component is added. They reflect real and common defects a board may have after production. However, there are some aspects that need to be considered when assessing how realistic the sample actually is. The dataset is defect-heavy (each image contains at least 1 defect) and in real factories, the majority of boards are fine. Also, there are only about 10 different board designs when in reality, factories are responsible for many more designs. Since the dataset only includes images of boards with defects, it is not certain how often this happens in production and a realistic share of defective boards will have to be assumed when calculating costs. Finally, since the board designs displayed are the same in training and testing, there might be inflated results that will differ when boards with different designs are introduced. Even though the dataset's limitations affect the generalization of results, the information fits the problem. It teaches the model what a defect looks like  and the assumptions made will handle the gaps to make the business impact clear.
+The dataset serves the problem directly as the images used show the boards at the stage in which they are sent to electronic manufacturers before any component is added. They reflect real and common defects a board may have after production. However, there are some aspects that need to be considered when assessing how realistic the sample actually is. The dataset is defect-heavy (each image contains at least 1 defect) and in real factories, the majority of boards are fine. Also, there are only about 10 different board designs when in reality, factories are responsible for many more designs. Since the dataset only includes images of boards with defects, it is not certain how often this happens in production and a realistic share of defective boards will have to be assumed when calculating costs. Finally, since the board designs displayed are the same in training and testing, there might be inflated results that will differ when boards with different designs are introduced. Even though the dataset's limitations affect the generalization of results, the information fits the problem. It teaches the model what a defect looks like and the assumptions made will handle the gaps to make the business impact clear.
 
 ## What the dataset's composition implies
 
@@ -44,7 +44,7 @@ The dataset serves the problem directly as the images used show the boards at th
 | **Total defects** | **2,303** | **273** | **377** |
 | **Images**      |   541 |    62 |   90 |
 
-The distribution of instances reflects a good class balance in training. The model will properly learn and practice from the different defects. Any difference in performance between classes later on will come from how hard the defect is to spot, not from lack of examples. When looking at testing, the sample is smaller, with 45-84 defects per class and a total of 90 images. This is important when analyzing per-class results since getting only 2 or 3 right or wrong could alter final metrics more. For example, on 'open_circuits', getting just 2 more defects wrong out of 45 drops recall by about 4 points. This could be defined by chance so when interpreting the results, a small difference will not mean one class is better. Additionally, validation is even smaller, so the progress checks are roguh rather than precise. 
+The distribution of instances reflects a good class balance in training. The model will properly learn and practice from the different defects. Any difference in performance between classes later on will come from how hard the defect is to spot, not from lack of examples. When looking at testing, the sample is smaller, with 45-84 defects per class and a total of 90 images. This is important when analyzing per-class results since getting only 2 or 3 right or wrong could alter final metrics more. For example, on 'open_circuits', getting just 2 more defects wrong out of 45 drops recall by about 4 points. This could be defined by chance so when interpreting the results, a small difference will not mean one class is better. Additionally, validation is even smaller, so the progress checks are rough rather than precise. 
 
 After computing the main statistics about the dataset, I identified that the median defect covers about 0.07% of the image. Even the largest defect is under 1% (0.825%) of the whole image. Evidently, it is a very small portion that could be difficult to spot. Before looking at images, YOLO shrinks the width of them (640 pixels by default) and defects would only be about 15-20 pixels after this. Due to this, during training and testing I will use larger image sizes to ensure proper learning and prevent the model from missing defects. This makes the process longer and it takes up more memory but it should help in performance.
 
@@ -65,7 +65,7 @@ The last two columns of the results are measures to understand when a defect cou
 
 The mAP50 and mAP50-95 evaluate how good the model is at detection at different strictness levels (0 being no good and 1 being perfect). For mAP50, a prediction counts as correct if it identifies a real defect and overlaps at least 50% of the original box. It averages scores throughout all classes and gives a final result. Considering the score from our model, mAP50 = 0.951, it is fair to conclude that it is close to perfect at finding and correctly labelling defects. In contrast, mAP50-95 is more demanding in terms of overlap percentage of the original box as it tests from 50% all the way up to 95% overlap. At the highest value, the box drawn by the model must practically fully overlap the original one. In our case, the value of 0.526 for mAP50-95 means that when extreme precision is required, the score drops significantly. 
 
-Compared to the COCO model and baseline, the gap was as large as expected. These models weren't trained to recognize defects so when presented with a task of detection, it wasn't surprising that they found none. Also, such a high score for the finetuned model is slightly optimistic now that the test boards come from the same board designs as the training ones, as mentioned previously in the report (not 100% realistic). The drop from mAP50 to mAP50-95 is not critical for this situation since the main focus is to flag possible defects instead of placing boxes perfectly around defects. 
+Compared to the COCO model and baseline, the gap was as large as expected. These models weren't trained to recognize defects so when presented with a task of detection, it wasn't surprising that they found none. Also, such a high score for the finetuned model is slightly optimistic since the test boards come from the same board designs as the training ones, as mentioned previously in the report (not 100% realistic). The drop from mAP50 to mAP50-95 is not critical for this situation since the main focus is to flag possible defects instead of placing boxes perfectly around defects. 
 
 
 
@@ -123,7 +123,7 @@ Based on research on actual costs of PCB factories and Spanish salaries, I appro
 
 - Correct Decisions: **€0**. A correctly discarded board was lost anyway, whatever the model does, so the model doesn't add a cost there. 
 
-- Base rate: **5%**. In an industry survey of PCB companies about what share of bare boards pass inspection, most (64%) reported more than 95%, and another 21% reported 90-95%. I therefore assume 5% of boardsare defective, and also test 2% and 10%.
+- Base rate: **5%**. In an industry survey of PCB companies about what share of bare boards pass inspection, most (64%) reported more than 95%, and another 21% reported 90-95%. I therefore assume 5% of boards are defective, and also test 2% and 10%.
 
 The most uncertain assumption here is the cost for False Negatives. It highly depends on whether the client catches it in initial testing before adding components (as low as 30 euros) or in the point where the defective board ends up in a finished phone that a customer returns (500 euros or more). Considering this, the threshold decision will be a trade-off between missing defects and paying more for inspections. If a miss is very expensive, the threshold for inspection will be low to make sure there are minimal misses. However, if a miss is cheap, fewer inspections are worth paying and a higher threshold can be set. To address this, I reran the cost sweep with €30 and €500 (results below). 
 
@@ -135,7 +135,7 @@ The most uncertain assumption here is the cost for False Negatives. It highly de
 - Between 0.25 and 0.78: send to an inspector
 - From 0.78: reject automatically
 
-This costs €316 per 1,000 boards. Most of it (about €279) comes from the 2.8 defective boards per 1,000 that still get shipped, because the model never boxes them at all. The best the model can do alone, with a single threshold and no inspectors, is €648, so adding the inspector band halves the cost.
+This costs €316 per 1,000 boards. Most of it (about €279) comes from the 2.8 defective boards per 1,000 that still get shipped, because the model scores them below 0.25, mostly with weak boxes, and a few with no box at all. The best the model can do alone, with a single threshold and no inspectors, is €648, so adding the inspector band halves the cost.
 
 ![Cost against threshold](artifacts/cost_curve.png)
 
@@ -149,13 +149,13 @@ of boards being defective:
 | €100 | 10% | 0.00 | 0.78 | 326 | 99% |
 | €500 | 2% / 5% / 10% | 0.00 | 0.78 | 328 to 329 | ~99% |
 
-When misses are cheap or defects are rare, the thresholds do not move at all, so the decision holds. But when a miss costs €500, or 10% of boards are defective, the cheapest option becomes sending almost every board to an inspector. This happens because about 5.6% of defects never get a box from the model, and no threshold can catch a defect the model does not see. So the decision depends heavily on the cost of a miss,and the factory should measure its real compensation costs before relying on the model.
+When misses are cheap or defects are rare, the thresholds do not move at all, so the decision holds. But when a miss costs €500, or 10% of boards are defective, the cheapest option becomes sending almost every board to an inspector. This happens because about 5.6% of defects score below 0.25. Most get only a weak box, and a few get no box at all. Lowering the threshold to catch them would also flag many good boards: the share of boards with a false box rises from 7.8% at 0.25 to 40% at 0.10. When a miss is expensive enough, checking every board becomes cheaper. So the decision depends heavily on the cost of a miss, and the factory should measure its real compensation costs before relying on the model.
 
 
 ## What a person still has to check
 With the thresholds chosen above (inspector from 0.25, automatic rejection from 0.78), 11.5% of boards go to an inspector. At 10,000 boards a day, that is about 1,150 checks a day.
 
-Each check takes about 1 minute, so an inspector working 7 productive hours (an 8-hour shift minus breaks) can check around 420 boards a day.That means about 1,150 / 420 = 2.7 inspectors, so 3 people.
+Each check takes about 1 minute, so an inspector working 7 productive hours (an 8-hour shift minus breaks) can check around 420 boards a day. That means about 1,150 / 420 = 2.7 inspectors, so 3 people.
 
 This is realistic. Checking every board today would need about 24 inspectors (10,000 / 420), so the model cuts the team by around 21
 people while the remaining inspectors only look at the uncertain boards. The main risk is that 1,150 checks a day is still repetitive
@@ -177,20 +177,20 @@ inspection labour (around €2,900 a day) for the expected cost of the few defec
 
 - **Same board designs in training and testing.** All images come from about 10 board designs, so the test score is likely optimistic. In order to address this, future tests should be on board designs the model has never seen, ideally photos from the factory's own production line.
 
-- **No defect-free boards.** Every image has at least one defect, sovthe false-alarm rate on good boards could only be estimated from areas without defects. For future testing, it is important to collect photos of good boards from the line and measure how often the model flags them. This is a more realistic approach as factory lines have the majority of boards defect-free.
+- **No defect-free boards.** Every image has at least one defect, so the false-alarm rate on good boards could only be estimated from areas without defects. For future testing, it is important to collect photos of good boards from the line and measure how often the model flags them. This is a more realistic approach as factory lines have the majority of boards defect-free.
 
 - **Artificial defects.** The defects in this dataset were added onto the boards on purpose, so real production defects may look different. Retraining and testing on real defective boards will cover this limitation.
 
 - **Uncertain cost of a miss.** The decision flips to checking almost every board when a miss costs €500. By measuring what the
-  factory actually pays in compensation per defective board, the sweep can be rerunned with the new value and decisions might be more stable.
+  factory actually pays in compensation per defective board, the sweep can be rerun with the new value and decisions might be more stable.
 
 - **Inspectors assumed perfect.** Real inspectors miss some defects, which affects both the inspector band and the option of checking
-  everything. For future interpretation, an inspectors approximate miss rate could be investigated further to account for possible misses.
+  everything. For future interpretation, the inspectors' approximate miss rate could be investigated further to account for possible misses.
 
 - **Small test set per class.** With only 45 to 84 defects per class, small differences between classes are not reliable. Getting a bigger test set would help towards this limitation.
 
 ## Generative AI use disclosure
-I used Claude for assitance during my project. Specifically, I worked with this tool for: 
+I used Claude for assistance during my project. Specifically, I worked with this tool for: 
 - **Understanding Concepts:** Explaining YOLO metrics (mAP, IoU), thresholds and cost sweeps.
 - **Research:** Comparing Roboflow datasets and finding sources for the cost figures (inspector salaries, board costs, defect rates).
 - **Code:** Writing train.py, app.py and dataset_stats.py.
